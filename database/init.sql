@@ -22,3 +22,30 @@ CREATE TABLE  users(
 
     CONSTRAINT  fk_user_role FOREIGN KEY (role_id) REFERENCES roles(id)
 );
+
+CREATE TABLE doctors (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL UNIQUE,
+    specialization varchar(100),
+    experience_years INT,
+    biography TEXT,
+
+    created_at timestamp default current_timestamp,
+    updated_at timestamp default current_timestamp,
+
+    CONSTRAINT fk_doctor_user FOREIGN KEY (user_id) REFERENCES users(id) On DELETE CASCADE
+);
+
+CREATE TABLE patients (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL UNIQUE,
+    blood_type varchar(5),
+    height DECIMAL(5, 2),
+    weight DECIMAL(5, 2),
+    medical_history TEXT,
+
+    created_at timestamp default current_timestamp,
+    updated_at timestamp default  current_timestamp,
+
+    CONSTRAINT fk_patient_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
