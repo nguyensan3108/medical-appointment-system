@@ -6,7 +6,9 @@ import lombok.Getter;
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Lỗi hệ thống không xác định"),
     USER_EXISTED(1001, "Email đã được sử dụng"),
-    ROLE_NOT_FOUND(1002, "Không tìm thấy quyền hạn này");
+    ROLE_NOT_FOUND(1002, "Không tìm thấy quyền hạn này"),
+    USER_NOT_FOUND(1003, "Không tìm thấy người dùng")
+    ;
 
     private  final int code;
     private  final String message;
