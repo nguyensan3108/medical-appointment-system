@@ -11,6 +11,7 @@ import com.healthcare.api.repository.RoleRepository;
 import com.healthcare.api.repository.UserRepository;
 import com.healthcare.api.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse createUser(UserCreationRequest request){
@@ -33,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
         user.setStatus("ACTIVE");
@@ -64,7 +66,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if(request.getPassword() != null &&  !request.getPassword().isEmpty()){
-            user.setPassword(request.getPassword());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         if(request.getFullName() != null &&  !request.getFullName().isEmpty()){
