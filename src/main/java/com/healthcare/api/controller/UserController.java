@@ -6,6 +6,7 @@ import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.UserResponse;
 import com.healthcare.api.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<UserResponse>> getUsers(){
         return ApiResponse.<List<UserResponse>>builder()
                 .code(1000)
@@ -37,6 +39,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
         return  ApiResponse.<UserResponse>builder()
                 .code(1000)
@@ -46,6 +49,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ApiResponse<UserResponse> updateUser(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
@@ -55,6 +59,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<String> deleteUser(@PathVariable("userId") String userId) {
         userService.deleteUser(userId);
         return ApiResponse.<String>builder()
