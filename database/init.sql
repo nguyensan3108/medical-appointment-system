@@ -53,3 +53,17 @@ CREATE TABLE patients
 
     CONSTRAINT fk_patient_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+CREATE TABLE schedules (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    doctor_id uuid NOT NULL,
+    available_from timestamp NOT NULL,
+    available_to timestamp NOT NULL,
+    is_available BOOLEAN DEFAULT True,
+    created_at timestamp DEFAULT current_timestamp,
+    updated_at timestamp default current_timestamp,
+
+    CONSTRAINT fk_schedule_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_schedule_doctor_date ON schedules(doctor_id, available_from);
