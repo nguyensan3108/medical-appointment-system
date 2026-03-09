@@ -11,6 +11,7 @@ public class UserResponse {
     private String fullName;
     private String phone;
     private String status;
-
     private String roleName;
+
+    private Object profile;
 }

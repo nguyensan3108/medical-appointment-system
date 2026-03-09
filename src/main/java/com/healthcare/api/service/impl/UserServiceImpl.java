@@ -3,14 +3,20 @@ package com.healthcare.api.service.impl;
 import com.healthcare.api.dto.request.UserCreationRequest;
 import com.healthcare.api.dto.request.UserUpdateRequest;
 import com.healthcare.api.dto.response.UserResponse;
+import com.healthcare.api.entity.Doctor;
+import com.healthcare.api.entity.Patient;
 import com.healthcare.api.entity.Role;
 import com.healthcare.api.entity.User;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
+import com.healthcare.api.repository.DoctorRepository;
+import com.healthcare.api.repository.PatientRepository;
 import com.healthcare.api.repository.RoleRepository;
 import com.healthcare.api.repository.UserRepository;
 import com.healthcare.api.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +28,12 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final DoctorRepository doctorRepository;
+    private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public UserResponse createUser(UserCreationRequest request){
         if(userRepository.existsByEmail(request.getEmail())){
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -43,7 +52,34 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
 
+        if(role.getName().toUpperCase().contains("DOCTOR")){
+            Doctor doctor = new Doctor();
+            doctor.setUser(savedUser);
+            doctor.setSpecialization(request.getSpecialization());
+            doctor.setExperienceYears(request.getExperienceYears());
+            doctor.setBiography(request.getBiography());
+            doctorRepository.save(doctor);
+        } else if(role.getName().toUpperCase().contains("PATIENT")){
+            Patient patient = new Patient();
+            patient.setUser(savedUser);
+            patient.setBloodType(request.getBloodType());
+            patient.setHeight(request.getHeight());
+            patient.setWeight(request.getWeight());
+            patient.setMedicalHistory(request.getMedicalHistory());
+            patientRepository.save(patient);
+        }
+
         return mapToUserResponse(savedUser);
+    }
+
+    @Override
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
+
+        User user = userRepository.findByEmail(name)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return mapToUserResponse(user);
     }
 
     @Override
@@ -98,6 +134,12 @@ public class UserServiceImpl implements UserService {
         response.setPhone(user.getPhone());
         response.setStatus(user.getStatus());
         response.setRoleName(user.getRole().getName());
+
+        if (user.getRole().getName().toUpperCase().contains("DOCTOR")) {
+            doctorRepository.findByUserId(user.getId()).ifPresent(response::setProfile);
+        } else if (user.getRole().getName().toUpperCase().contains("PATIENT")) {
+            patientRepository.findByUserId(user.getId()).ifPresent(response::setProfile);
+        }
         return response;
     }
 }

@@ -1,5 +1,6 @@
 package com.healthcare.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class User {
     private String email;
 
     @Column(nullable = false,length = 255)
+    @JsonIgnore
     private String password;
 
     @Column(name = "full_name", nullable = false, length = 255)
