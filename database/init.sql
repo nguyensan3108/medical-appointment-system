@@ -67,3 +67,21 @@ CREATE TABLE schedules (
 );
 
 CREATE INDEX idx_schedule_doctor_date ON schedules(doctor_id, available_from);
+
+Create table appointments (
+    id uuid primary key default pg_catalog.gen_random_uuid(),
+    patient_id uuid not null,
+    doctor_id uuid not null,
+    schedule_id uuid not null unique,
+    reason text,
+    status varchar(20) default 'PENDING',
+
+    created_at timestamp default current_timestamp,
+    updated_at timestamp default current_timestamp,
+
+    constraint fk_appointment_patient foreign key (patient_id) references patients(id),
+    constraint fk_appointment_doctor foreign key (doctor_id) references doctors(id),
+    constraint fk_appointment_schedule foreign key (schedule_id) references schedules(id)
+);
+
+CREATE INDEX idx_appointment_patient on appointments(patient_id);

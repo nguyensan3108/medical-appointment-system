@@ -56,6 +56,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             }
             currentSlot = nextSlot;
         }
+        if (schedulesToSave.isEmpty()) {
+            throw new AppException(ErrorCode.SCHEDULE_ALREADY_BOOKED);
+        }
         scheduleRepository.saveAll(schedulesToSave);
     }
 
