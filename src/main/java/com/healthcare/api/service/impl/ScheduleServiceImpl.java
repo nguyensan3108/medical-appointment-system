@@ -7,6 +7,7 @@ import com.healthcare.api.entity.Schedule;
 import com.healthcare.api.entity.User;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
+import com.healthcare.api.mapper.ScheduleMapper;
 import com.healthcare.api.repository.DoctorRepository;
 import com.healthcare.api.repository.ScheduleRepository;
 import com.healthcare.api.repository.UserRepository;
@@ -27,6 +28,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final DoctorRepository doctorRepository;
     private final UserRepository userRepository;
+    private final ScheduleMapper scheduleMapper;
 
     @Override
     @Transactional
@@ -70,7 +72,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMonths(3)
         );
-        return schedules.stream().map(this::mapToResponse).toList();
+        return schedules.stream().map(scheduleMapper::toScheduleResponse).toList();
     }
 
     private Doctor getCurrentDoctor() {
@@ -82,15 +84,5 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         return doctorRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private ScheduleResponse mapToResponse(Schedule schedule) {
-        ScheduleResponse response = new ScheduleResponse();
-        response.setId(schedule.getId());
-        response.setDoctorId(schedule.getDoctor().getId());
-        response.setAvailableFrom(schedule.getAvailableFrom());
-        response.setAvailableTo(schedule.getAvailableTo());
-        response.setAvailable(schedule.isAvailable());
-        return response;
     }
 }
