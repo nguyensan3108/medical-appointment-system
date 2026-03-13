@@ -8,6 +8,7 @@ import com.healthcare.api.entity.Schedule;
 import com.healthcare.api.entity.User;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
+import com.healthcare.api.mapper.AppointmentMapper;
 import com.healthcare.api.repository.AppointmentRepository;
 import com.healthcare.api.repository.PatientRepository;
 import com.healthcare.api.repository.ScheduleRepository;
@@ -26,6 +27,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final ScheduleRepository scheduleRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
+    private final AppointmentMapper appointmentMapper;
 
     @Override
     @Transactional
@@ -56,20 +58,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
-        return mapToResponse(savedAppointment);
-    }
-
-    private AppointmentResponse mapToResponse(Appointment appointment){
-        AppointmentResponse response = new AppointmentResponse();
-        response.setId(appointment.getId());
-        response.setPatientName(appointment.getPatient().getUser().getFullName());
-        response.setDoctorName(appointment.getDoctor().getUser().getFullName());
-        response.setSpecialization(appointment.getDoctor().getSpecialization());
-        response.setStartTime(appointment.getSchedule().getAvailableFrom());
-        response.setEndTime(appointment.getSchedule().getAvailableTo());
-        response.setReason(appointment.getReason());
-        response.setStatus(appointment.getStatus().name());
-
-        return response;
+        return appointmentMapper.toAppointmentResponse(savedAppointment);
     }
 }

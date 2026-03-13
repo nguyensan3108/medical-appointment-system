@@ -9,6 +9,7 @@ import com.healthcare.api.entity.Role;
 import com.healthcare.api.entity.User;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
+import com.healthcare.api.mapper.UserMapper;
 import com.healthcare.api.repository.DoctorRepository;
 import com.healthcare.api.repository.PatientRepository;
 import com.healthcare.api.repository.RoleRepository;
@@ -31,6 +32,7 @@ public class UserServiceImpl implements UserService {
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
@@ -127,13 +129,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserResponse mapToUserResponse(User user){
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setEmail(user.getEmail());
-        response.setFullName(user.getFullName());
-        response.setPhone(user.getPhone());
-        response.setStatus(user.getStatus());
-        response.setRoleName(user.getRole().getName());
+        UserResponse response = userMapper.toUserResponse(user);
 
         if (user.getRole().getName().toUpperCase().contains("DOCTOR")) {
             doctorRepository.findByUserId(user.getId()).ifPresent(response::setProfile);
