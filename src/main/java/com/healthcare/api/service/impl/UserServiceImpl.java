@@ -9,6 +9,8 @@ import com.healthcare.api.entity.Role;
 import com.healthcare.api.entity.User;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
+import com.healthcare.api.mapper.DoctorMapper;
+import com.healthcare.api.mapper.PatientMapper;
 import com.healthcare.api.mapper.UserMapper;
 import com.healthcare.api.repository.DoctorRepository;
 import com.healthcare.api.repository.PatientRepository;
@@ -33,6 +35,8 @@ public class UserServiceImpl implements UserService {
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final DoctorMapper doctorMapper;
+    private final PatientMapper patientMapper;
 
     @Override
     @Transactional
@@ -55,19 +59,12 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
 
         if(role.getName().toUpperCase().contains("DOCTOR")){
-            Doctor doctor = new Doctor();
+            Doctor doctor = doctorMapper.toDoctor(request);
             doctor.setUser(savedUser);
-            doctor.setSpecialization(request.getSpecialization());
-            doctor.setExperienceYears(request.getExperienceYears());
-            doctor.setBiography(request.getBiography());
             doctorRepository.save(doctor);
         } else if(role.getName().toUpperCase().contains("PATIENT")){
-            Patient patient = new Patient();
+            Patient patient = patientMapper.toPatient(request);
             patient.setUser(savedUser);
-            patient.setBloodType(request.getBloodType());
-            patient.setHeight(request.getHeight());
-            patient.setWeight(request.getWeight());
-            patient.setMedicalHistory(request.getMedicalHistory());
             patientRepository.save(patient);
         }
 
@@ -99,20 +96,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponse updateUser(String id, UserUpdateRequest request){
         User user = userRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
+        userMapper.updateUser(user, request);
+
         if(request.getPassword() != null &&  !request.getPassword().isEmpty()){
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
-
-        if(request.getFullName() != null &&  !request.getFullName().isEmpty()){
-            user.setFullName(request.getFullName());
-        }
-
-        if(request.getPhone() != null &&  !request.getPhone().isEmpty()){
-            user.setPhone(request.getPhone());
         }
 
         User savedUser = userRepository.save(user);
