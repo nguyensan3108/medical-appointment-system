@@ -2,10 +2,7 @@ package com.healthcare.api.service.impl;
 
 import com.healthcare.api.dto.request.AppointmentCreationRequest;
 import com.healthcare.api.dto.response.AppointmentResponse;
-import com.healthcare.api.entity.Appointment;
-import com.healthcare.api.entity.Patient;
-import com.healthcare.api.entity.Schedule;
-import com.healthcare.api.entity.User;
+import com.healthcare.api.entity.*;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
 import com.healthcare.api.mapper.AppointmentMapper;
@@ -19,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -59,5 +58,33 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
         return appointmentMapper.toAppointmentResponse(savedAppointment);
+    }
+
+    @Override
+    @Transactional
+    public void cancelAppointment(String appointmentId) {
+        Appointment appointment = appointmentRepository.findById(UUID.fromString(appointmentId))
+                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+
+        var context = SecurityContextHolder.getContext();
+        String currentUserEmail = context.getAuthentication().getName();
+
+        String patientEmail = appointment.getPatient().getUser().getEmail();
+        String doctorEmail = appointment.getDoctor().getUser().getEmail();
+
+        if (!currentUserEmail.equals(patientEmail) && !currentUserEmail.equals(doctorEmail)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED_ACTION);
+        }
+
+        if(appointment.getStatus() == AppointmentStatus.CANCELLED || appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new AppException(ErrorCode.INVALID_STATUS);
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointmentRepository.save(appointment);
+
+        Schedule schedule = appointment.getSchedule();
+        schedule.setAvailable(true);
+        scheduleRepository.save(schedule);
     }
 }

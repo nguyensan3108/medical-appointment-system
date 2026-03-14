@@ -7,10 +7,7 @@ import com.healthcare.api.service.AppointmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/appointments")
@@ -25,6 +22,16 @@ public class AppointmentController {
                 .code(1000)
                 .message("Appointment booked successfully")
                 .result(appointmentService.bookAppointment(request))
+                .build();
+    }
+
+    @PutMapping("/{appointmentId}/cancel")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
+    public ApiResponse<String> cancelAppointment(@PathVariable String appointmentId){
+        appointmentService.cancelAppointment(appointmentId);
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("Appointment has been cancelled successfully")
                 .build();
     }
 }

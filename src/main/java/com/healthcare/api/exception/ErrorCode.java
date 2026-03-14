@@ -14,7 +14,10 @@ public enum ErrorCode {
     UNAUTHENTICATED(1005, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     PATIENT_NOT_FOUND(1006, "Patient not found", HttpStatus.NOT_FOUND),
     SCHEDULE_NOT_FOUND(1007, "Schedule not found", HttpStatus.NOT_FOUND),
-    SCHEDULE_ALREADY_BOOKED(1008, "Schedule already booked", HttpStatus.BAD_REQUEST)
+    SCHEDULE_ALREADY_BOOKED(1008, "Schedule already booked", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_ACTION(1009, "You do not have permission to perform this action", HttpStatus.FORBIDDEN),
+    APPOINTMENT_NOT_FOUND(1010, "Appointment not found", HttpStatus.NOT_FOUND),
+    INVALID_STATUS(1011, "Invalid status", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
