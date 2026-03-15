@@ -18,6 +18,8 @@ public enum ErrorCode {
     UNAUTHORIZED_ACTION(1009, "You do not have permission to perform this action", HttpStatus.FORBIDDEN),
     APPOINTMENT_NOT_FOUND(1010, "Appointment not found", HttpStatus.NOT_FOUND),
     INVALID_STATUS(1011, "Invalid status", HttpStatus.BAD_REQUEST),
+    RECORD_ALREADY_EXISTS(1012, "Medical record already exists for this appointment", HttpStatus.BAD_REQUEST),
+    RECORD_NOT_FOUND(1013, "Medical record not found for this appointment", HttpStatus.NOT_FOUND),
     ;
 
     private final int code;

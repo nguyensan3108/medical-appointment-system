@@ -72,7 +72,7 @@ Create table appointments (
     id uuid primary key default pg_catalog.gen_random_uuid(),
     patient_id uuid not null,
     doctor_id uuid not null,
-    schedule_id uuid not null unique,
+    schedule_id uuid not null,
     reason text,
     status varchar(20) default 'PENDING',
 
@@ -85,3 +85,24 @@ Create table appointments (
 );
 
 CREATE INDEX idx_appointment_patient on appointments(patient_id);
+
+Create table medical_records (
+    id uuid primary key,
+    appointment_id uuid not null unique,
+    symptoms text,
+    diagnosis text not null,
+    treatment_plan text,
+    notes text,
+    created_at timestamp without time zone,
+    constraint fk_medical_record_appointment foreign key (appointment_id) references appointments(id)
+);
+
+create table prescriptions (
+    id uuid primary key,
+    medical_record_id uuid not null,
+    medication_name varchar(255) not null,
+    dosage varchar(255) not null,
+    duration varchar(255),
+    instructions text,
+    constraint fr_prescription_medical_record foreign key (medical_record_id) references medical_records(id)
+);
