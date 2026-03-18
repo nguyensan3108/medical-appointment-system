@@ -32,5 +32,15 @@ public class Prescription {
     @Column(columnDefinition = "TEXT")
     private String instructions;
 
+    @Override
+    public boolean equals(Object o){
+        if(this== o) return true;
+        if(!(o instanceof Prescription prescription)) return false;
+        return id != null && id.equals(prescription.getId());
+    }
 
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

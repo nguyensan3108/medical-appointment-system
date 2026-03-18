@@ -1,7 +1,8 @@
 package com.healthcare.api.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -10,7 +11,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "appointments")
-@Data
+@Getter
+@Setter
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,4 +40,16 @@ public class Appointment {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    @Override
+    public boolean equals(Object o){
+        if(this== o) return true;
+        if(!(o instanceof Appointment appointment)) return false;
+        return id != null && id.equals(appointment.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 }
