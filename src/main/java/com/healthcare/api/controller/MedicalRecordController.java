@@ -1,5 +1,6 @@
 package com.healthcare.api.controller;
 
+import com.healthcare.api.constant.SuccessCode;
 import com.healthcare.api.dto.request.MedicalRecordCreationRequest;
 import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.MedicalRecordResponse;
@@ -20,7 +21,7 @@ public class MedicalRecordController {
     @PreAuthorize("hasRole('DOCTOR')")
     public ApiResponse<MedicalRecordResponse> createMedicalRecord(@RequestBody @Valid MedicalRecordCreationRequest request) {
         return ApiResponse.<MedicalRecordResponse>builder()
-                .code(1000)
+                .code(SuccessCode.CREATED.getCode())
                 .message("Medical record created successfully")
                 .result(medicalRecordService.createMedicalRecord(request))
                 .build();
@@ -30,7 +31,7 @@ public class MedicalRecordController {
     @PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
     public ApiResponse<MedicalRecordResponse> getMedicalRecordByAppointmentId(@PathVariable String appointmentId) {
         return ApiResponse.<MedicalRecordResponse>builder()
-                .code(1000)
+                .code(SuccessCode.DATA_FETCHED.getCode())
                 .message("Medical record retrieved successfully")
                 .result(medicalRecordService.getMedicalRecordByAppointmentId(appointmentId))
                 .build();

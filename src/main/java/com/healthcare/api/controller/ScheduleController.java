@@ -1,5 +1,6 @@
 package com.healthcare.api.controller;
 
+import com.healthcare.api.constant.SuccessCode;
 import com.healthcare.api.dto.request.ScheduleCreationRequest;
 import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.ScheduleResponse;
@@ -23,7 +24,7 @@ public class ScheduleController {
     public ApiResponse<String> createSchedule(@RequestBody @Valid ScheduleCreationRequest request) {
         scheduleService.createSchedule(request);
         return ApiResponse.<String>builder()
-                .code(1000)
+                .code(SuccessCode.CREATED.getCode())
                 .message("Schedule created successfully")
                 .result("Time slots saved to the system")
                 .build();
@@ -33,7 +34,7 @@ public class ScheduleController {
     @PreAuthorize("hasRole('DOCTOR')")
     public ApiResponse<List<ScheduleResponse>> getMySchedules() {
         return ApiResponse.<List<ScheduleResponse>>builder()
-                .code(1000)
+                .code(SuccessCode.DATA_FETCHED.getCode())
                 .message("Your work schedule list")
                 .result(scheduleService.getMySchedules())
                 .build();

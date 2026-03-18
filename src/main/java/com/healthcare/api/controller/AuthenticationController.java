@@ -1,5 +1,6 @@
 package com.healthcare.api.controller;
 
+import com.healthcare.api.constant.SuccessCode;
 import com.healthcare.api.dto.request.AuthenticationRequest;
 import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.AuthenticationResponse;
@@ -21,7 +22,7 @@ public class AuthenticationController {
     public ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
         return ApiResponse.<AuthenticationResponse>builder()
-                .code(1000)
+                .code(SuccessCode.SUCCESS.getCode())
                 .result(result)
                 .build();
     }

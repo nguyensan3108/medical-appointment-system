@@ -1,5 +1,6 @@
 package com.healthcare.api.controller;
 
+import com.healthcare.api.constant.SuccessCode;
 import com.healthcare.api.dto.request.AppointmentCreationRequest;
 import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.AppointmentResponse;
@@ -19,7 +20,7 @@ public class AppointmentController {
     @PreAuthorize("hasRole('PATIENT')")
     public ApiResponse<AppointmentResponse> bookAppointment(@RequestBody @Valid AppointmentCreationRequest request){
         return ApiResponse.<AppointmentResponse>builder()
-                .code(1000)
+                .code(SuccessCode.CREATED.getCode())
                 .message("Appointment booked successfully")
                 .result(appointmentService.bookAppointment(request))
                 .build();
@@ -30,7 +31,7 @@ public class AppointmentController {
     public ApiResponse<String> cancelAppointment(@PathVariable String appointmentId){
         appointmentService.cancelAppointment(appointmentId);
         return ApiResponse.<String>builder()
-                .code(1000)
+                .code(SuccessCode.SUCCESS.getCode())
                 .message("Appointment has been cancelled successfully")
                 .build();
     }

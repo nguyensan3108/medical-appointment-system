@@ -1,5 +1,6 @@
 package com.healthcare.api.controller;
 
+import com.healthcare.api.constant.SuccessCode;
 import com.healthcare.api.dto.request.UserCreationRequest;
 import com.healthcare.api.dto.request.UserUpdateRequest;
 import com.healthcare.api.dto.response.ApiResponse;
@@ -23,7 +24,7 @@ public class UserController {
         UserResponse result = userService.createUser(request);
 
         return ApiResponse.<UserResponse>builder()
-                .code(1000)
+                .code(SuccessCode.CREATED.getCode())
                 .message("User created successfully")
                 .result(result)
                 .build();
@@ -33,7 +34,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<UserResponse>> getUsers(){
         return ApiResponse.<List<UserResponse>>builder()
-                .code(1000)
+                .code(SuccessCode.DATA_FETCHED.getCode())
                 .message("Get all users")
                 .result(userService.getUsers())
                 .build();
@@ -43,7 +44,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
         return  ApiResponse.<UserResponse>builder()
-                .code(1000)
+                .code(SuccessCode.DATA_FETCHED.getCode())
                 .message("Get user information by id")
                 .result(userService.getUser(userId))
                 .build();
@@ -53,7 +54,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ApiResponse<UserResponse> updateUser(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
-                .code(1000)
+                .code(SuccessCode.SUCCESS.getCode())
                 .message("Update user information by id")
                 .result(userService.updateUser(userId, request))
                 .build();
@@ -64,7 +65,7 @@ public class UserController {
     public ApiResponse<String> deleteUser(@PathVariable("userId") String userId) {
         userService.deleteUser(userId);
         return ApiResponse.<String>builder()
-                .code(1000)
+                .code(SuccessCode.SUCCESS.getCode())
                 .message("Delete user information by id")
                 .result("User Id deleted: " + userId)
                 .build();
