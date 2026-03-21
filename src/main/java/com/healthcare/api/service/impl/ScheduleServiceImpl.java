@@ -15,12 +15,13 @@ import com.healthcare.api.service.ScheduleService;
 import com.healthcare.api.utils.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,13 +41,23 @@ public class ScheduleServiceImpl implements ScheduleService {
         LocalDateTime endTime = request.getAvailableTo();
         int duration = request.getDurationTime();
 
+        List<Schedule> existingSchedules = scheduleRepository.findByDoctorIdAndAvailableFromBetween(
+                doctor.getId(),
+                currentSlot,
+                endTime
+        );
+
+        Set<LocalDateTime> existingSlots = existingSchedules.stream()
+                .map(Schedule::getAvailableFrom)
+                .collect(Collectors.toSet());
+
         List<Schedule> schedulesToSave = new ArrayList<>();
 
         while (currentSlot.plusMinutes(duration).isBefore(endTime) ||
                 currentSlot.plusMinutes(duration).equals(endTime)) {
             LocalDateTime nextSlot = currentSlot.plusMinutes(duration);
 
-            boolean exists = scheduleRepository.existsByDoctorIdAndAvailableFrom(doctor.getId(), currentSlot);
+            boolean exists = existingSlots.contains(currentSlot);
 
             if (!exists) {
                 Schedule schedule = new Schedule();
