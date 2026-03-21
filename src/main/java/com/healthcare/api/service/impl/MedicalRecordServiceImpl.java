@@ -12,8 +12,8 @@ import com.healthcare.api.mapper.MedicalRecordMapper;
 import com.healthcare.api.repository.AppointmentRepository;
 import com.healthcare.api.repository.MedicalRecordRepository;
 import com.healthcare.api.service.MedicalRecordService;
+import com.healthcare.api.utils.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,11 +65,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         MedicalRecord record = medicalRecordRepository.findByAppointmentId(UUID.fromString(appointmentId))
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOT_FOUND));
 
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUserEmail = SecurityUtils.getCurrentUserEmail();
         String patientEmail = record.getAppointment().getPatient().getUser().getEmail();
         String doctorEmail = record.getAppointment().getDoctor().getUser().getEmail();
 
-        if(!currentUserEmail.equals(patientEmail) && !doctorEmail.equals(patientEmail)){
+        if(!currentUserEmail.equals(patientEmail) && !currentUserEmail.equals(doctorEmail)){
             throw new AppException(ErrorCode.UNAUTHORIZED_ACTION);
         }
         return medicalRecordMapper.toMedicalRecordResponse(record);

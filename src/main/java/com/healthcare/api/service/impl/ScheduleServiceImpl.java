@@ -12,6 +12,7 @@ import com.healthcare.api.repository.DoctorRepository;
 import com.healthcare.api.repository.ScheduleRepository;
 import com.healthcare.api.repository.UserRepository;
 import com.healthcare.api.service.ScheduleService;
+import com.healthcare.api.utils.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -76,8 +77,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     private Doctor getCurrentDoctor() {
-        var context = SecurityContextHolder.getContext();
-        String email = context.getAuthentication().getName();
+        String email = SecurityUtils.getCurrentUserEmail();
 
         User user = userRepository.findByEmail(email).
                 orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));

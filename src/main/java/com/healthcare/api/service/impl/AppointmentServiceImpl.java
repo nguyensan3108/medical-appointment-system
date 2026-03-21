@@ -12,6 +12,7 @@ import com.healthcare.api.repository.ScheduleRepository;
 import com.healthcare.api.repository.UserRepository;
 import com.healthcare.api.service.AppointmentService;
 
+import com.healthcare.api.utils.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentResponse bookAppointment(AppointmentCreationRequest request){
-        var context = SecurityContextHolder.getContext();
-        String email = context.getAuthentication().getName();
+        String email = SecurityUtils.getCurrentUserEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -66,8 +66,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.findById(UUID.fromString(appointmentId))
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
-        var context = SecurityContextHolder.getContext();
-        String currentUserEmail = context.getAuthentication().getName();
+        String currentUserEmail = SecurityUtils.getCurrentUserEmail();
 
         String patientEmail = appointment.getPatient().getUser().getEmail();
         String doctorEmail = appointment.getDoctor().getUser().getEmail();

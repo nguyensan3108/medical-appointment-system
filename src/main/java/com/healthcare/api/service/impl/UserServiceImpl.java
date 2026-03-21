@@ -17,6 +17,7 @@ import com.healthcare.api.repository.PatientRepository;
 import com.healthcare.api.repository.RoleRepository;
 import com.healthcare.api.repository.UserRepository;
 import com.healthcare.api.service.UserService;
+import com.healthcare.api.utils.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -73,10 +74,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getMyInfo() {
-        var context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
+        String email = SecurityUtils.getCurrentUserEmail();
 
-        User user = userRepository.findByEmail(name)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return mapToUserResponse(user);
     }
