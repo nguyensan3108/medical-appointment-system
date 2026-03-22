@@ -1,6 +1,7 @@
 package com.healthcare.api.service.impl;
 
 import com.healthcare.api.dto.request.ScheduleCreationRequest;
+import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.dto.response.ScheduleResponse;
 import com.healthcare.api.entity.Doctor;
 import com.healthcare.api.entity.Schedule;
@@ -15,6 +16,9 @@ import com.healthcare.api.service.ScheduleService;
 import com.healthcare.api.utils.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -77,14 +81,27 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public List<ScheduleResponse> getMySchedules() {
+    public PageResponse<ScheduleResponse> getMySchedules(int page, int size) {
         Doctor doctor = getCurrentDoctor();
-        List<Schedule> schedules = scheduleRepository.findByDoctorIdAndAvailableFromBetween(
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Schedule> schedulePage = scheduleRepository.findByDoctorIdAndAvailableFromBetween(
                 doctor.getId(),
                 LocalDateTime.now(),
-                LocalDateTime.now().plusMonths(3)
+                LocalDateTime.now().plusMonths(3),
+                pageable
         );
-        return schedules.stream().map(scheduleMapper::toScheduleResponse).toList();
+
+        List<ScheduleResponse> responses = schedulePage.getContent().stream()
+                .map(scheduleMapper::toScheduleResponse)
+                .toList();
+        return PageResponse.<ScheduleResponse>builder()
+                .currentPage(page)
+                .totalPages(schedulePage.getTotalPages())
+                .pageSize(schedulePage.getSize())
+                .totalElements(schedulePage.getTotalElements())
+                .data(responses)
+                .build();
     }
 
     private Doctor getCurrentDoctor() {

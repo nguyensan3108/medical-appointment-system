@@ -4,14 +4,13 @@ import com.healthcare.api.constant.SuccessCode;
 import com.healthcare.api.dto.request.UserCreationRequest;
 import com.healthcare.api.dto.request.UserUpdateRequest;
 import com.healthcare.api.dto.response.ApiResponse;
+import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.dto.response.UserResponse;
 import com.healthcare.api.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -32,11 +31,14 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<UserResponse>> getUsers(){
-        return ApiResponse.<List<UserResponse>>builder()
+    public ApiResponse<PageResponse<UserResponse>> getUsers(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ){
+        return ApiResponse.<PageResponse<UserResponse>>builder()
                 .code(SuccessCode.DATA_FETCHED.getCode())
                 .message("Get all users")
-                .result(userService.getUsers())
+                .result(userService.getUsers(page, size))
                 .build();
     }
 

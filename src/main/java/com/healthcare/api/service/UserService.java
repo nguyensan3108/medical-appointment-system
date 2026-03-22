@@ -2,16 +2,15 @@ package com.healthcare.api.service;
 
 import com.healthcare.api.dto.request.UserCreationRequest;
 import com.healthcare.api.dto.request.UserUpdateRequest;
+import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.dto.response.UserResponse;
-
-import java.util.List;
 
 public interface UserService {
     UserResponse createUser(UserCreationRequest request);
 
     UserResponse getMyInfo();
 
-    List<UserResponse> getUsers();
+    PageResponse<UserResponse> getUsers(int page, int size);
     UserResponse getUser(String id);
 
     UserResponse updateUser(String id, UserUpdateRequest request);

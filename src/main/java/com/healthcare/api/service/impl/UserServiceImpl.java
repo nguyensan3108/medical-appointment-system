@@ -2,6 +2,7 @@ package com.healthcare.api.service.impl;
 
 import com.healthcare.api.dto.request.UserCreationRequest;
 import com.healthcare.api.dto.request.UserUpdateRequest;
+import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.dto.response.UserResponse;
 import com.healthcare.api.entity.Doctor;
 import com.healthcare.api.entity.Patient;
@@ -20,7 +21,9 @@ import com.healthcare.api.service.UserService;
 import com.healthcare.api.utils.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -82,10 +85,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getUsers() {
-        return userRepository.findAll().stream()
+    public PageResponse<UserResponse> getUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<User> userPage = userRepository.findAll(pageable);
+
+        List<UserResponse> userResponses = userPage.getContent().stream()
                 .map(this::mapToUserResponse)
                 .toList();
+
+        return PageResponse.<UserResponse>builder()
+                .currentPage(page)
+                .totalPages(userPage.getTotalPages())
+                .pageSize(userPage.getSize())
+                .totalElements(userPage.getTotalElements())
+                .data(userResponses)
+                .build();
     }
 
     @Override
