@@ -20,6 +20,7 @@ public enum ErrorCode {
     INVALID_STATUS(1011, "Invalid status", HttpStatus.BAD_REQUEST),
     RECORD_ALREADY_EXISTS(1012, "Medical record already exists for this appointment", HttpStatus.BAD_REQUEST),
     RECORD_NOT_FOUND(1013, "Medical record not found for this appointment", HttpStatus.NOT_FOUND),
+    VALIDATION_ERROR(1014, "Invalid input data", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
