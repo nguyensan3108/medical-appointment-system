@@ -15,6 +15,7 @@ import com.healthcare.api.repository.DoctorRepository;
 import com.healthcare.api.repository.PatientRepository;
 import com.healthcare.api.repository.RoleRepository;
 import com.healthcare.api.repository.UserRepository;
+import com.healthcare.api.utils.security.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,5 +144,45 @@ class UserServiceImplTest {
         assertEquals(expectedUserResponse.getEmail(), result.getEmail());
         verify(userRepository, times(1)).save(any(User.class));
         verify(doctorRepository, times(1)).save(any());
+    }
+
+    @Test
+    void getMyInfo_Success_ReturnUserResponse() {
+        String email = "test_email@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setId(UUID.randomUUID());
+        Role role = new Role();
+        role.setName("PATIENT");
+        user.setRole(role);
+
+        UserResponse expectedUserResponse = new UserResponse();
+        expectedUserResponse.setEmail(email);
+
+        try (var mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUserEmail).thenReturn(email);
+
+            when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+            when(userMapper.toUserResponse(any())).thenReturn(expectedUserResponse);
+            when(patientRepository.findByUserId(any())).thenReturn(Optional.empty());
+
+            var result = userService.getMyInfo();
+            assertEquals(email, result.getEmail());
+        }
+    }
+
+    @Test
+    void getMyInfo_UserNotFound_ThrowsAppException() {
+        String email = "uknown@email.com";
+
+        try (var mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUserEmail).thenReturn(email);
+
+            when(userRepository.findByEmail(email)).thenReturn(empty());
+
+            AppException exception = assertThrows(AppException.class, () ->
+                userService.getMyInfo());
+                assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        }
     }
 }
