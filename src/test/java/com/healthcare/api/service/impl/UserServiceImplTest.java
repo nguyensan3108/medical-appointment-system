@@ -1,6 +1,7 @@
 package com.healthcare.api.service.impl;
 
 import com.healthcare.api.dto.request.UserCreationRequest;
+import com.healthcare.api.dto.request.UserUpdateRequest;
 import com.healthcare.api.dto.response.UserResponse;
 import com.healthcare.api.entity.Doctor;
 import com.healthcare.api.entity.Patient;
@@ -80,7 +81,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void CreateUser_RoleNotFound_ThrowsAppException() {
+    void createUser_RoleNotFound_ThrowsAppException() {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(roleRepository.findById(anyInt())).thenReturn(Optional.empty());
 
@@ -184,5 +185,80 @@ class UserServiceImplTest {
                 userService.getMyInfo());
                 assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
         }
+    }
+
+    @Test
+    void getUser_Success_ReturnUserResponse() {
+        UUID id = UUID.randomUUID();
+        Role role = new Role();
+        role.setName("PATIENT");
+        User user = new User();
+        user.setId(id);
+        user.setEmail("user_email@gmail.com");
+        user.setRole(role);
+
+        UserResponse response = new UserResponse();
+        response.setEmail("user_email@gmail.com");
+
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        when(userMapper.toUserResponse(any())).thenReturn(response);
+        when(patientRepository.findByUserId(any())).thenReturn(empty());
+
+        var result = userService.getUser(id.toString());
+
+        assertEquals("user_email@gmail.com", result.getEmail());
+    }
+
+    @Test
+    void getUser_NotFound_ThrowsAppException() {
+        when(userRepository.findById(any())).thenReturn(empty());
+
+        AppException exception = assertThrows(AppException.class, () ->
+                userService.getUser(UUID.randomUUID().toString()));
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void updateUser_Success_ReturnUserResponse() {
+        UUID id = UUID.randomUUID();
+        var updateRequest = new UserUpdateRequest();
+        updateRequest.setPassword("NEW_PASSWORD");
+        updateRequest.setFullName("NEW_FULL_NAME");
+        Role role = new Role();
+        role.setName("PATIENT");
+
+        User existingUser = new User();
+        existingUser.setId(id);
+        existingUser.setRole(role);
+
+        User savedUSer = new User();
+        savedUSer.setFullName("NEW_FULL_NAME");
+        savedUSer.setRole(role);
+
+        UserResponse response = new UserResponse();
+        response.setFullName("NEW_FULL_NAME");
+
+        when(userRepository.findById(any())).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any())).thenReturn(savedUSer);
+        when(userMapper.toUserResponse(any())).thenReturn(response);
+
+        var result = userService.updateUser(id.toString(), updateRequest);
+
+        assertEquals("NEW_FULL_NAME", result.getFullName());
+        verify(userRepository).save(any());
+    }
+
+    @Test
+    void deleteUser_Success() {
+        UUID id = UUID.randomUUID();
+        String stringId = id.toString();
+
+        when(userRepository.existsById(id)).thenReturn(true);
+
+        userService.deleteUser(stringId);
+
+        verify(userRepository, times(1)).deleteById(any(UUID.class));
     }
 }
