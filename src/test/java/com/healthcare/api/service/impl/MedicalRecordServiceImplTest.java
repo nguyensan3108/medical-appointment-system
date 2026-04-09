@@ -100,4 +100,73 @@ class MedicalRecordServiceImplTest {
             assertEquals(ErrorCode.UNAUTHORIZED_ACTION, exception.getErrorCode());
         }
     }
+
+    @Test
+    void createMedicalRecord_AppointmentNotFound(){
+        when(appointmentRepository.findById(any())).thenReturn(Optional.empty());
+
+        AppException exception = assertThrows(AppException.class, () ->
+                medicalRecordServiceImpl.createMedicalRecord((request)));
+
+        assertEquals(ErrorCode.UNAUTHORIZED_ACTION, exception.getErrorCode());
+    }
+
+    @Test
+    void createMedicalRecord_RecordAlreadyExists(){
+        Appointment appointment = new Appointment();
+
+        when(appointmentRepository.findById(any())).thenReturn(Optional.of(appointment));
+        when(medicalRecordRepository.findByAppointmentId(any())).thenReturn(Optional.of(new MedicalRecord()));
+
+        AppException exception = assertThrows(AppException.class, () ->
+                medicalRecordServiceImpl.createMedicalRecord((request)));
+        assertEquals(ErrorCode.RECORD_ALREADY_EXISTS, exception.getErrorCode());
+    }
+
+    @Test
+    void getMedicalRecord_RecordNotFound() {
+        when(medicalRecordRepository.findByAppointmentId(any())).thenReturn(Optional.empty());
+
+        AppException exception = assertThrows(AppException.class, () ->
+                medicalRecordServiceImpl.getMedicalRecordByAppointmentId(appointmentId));
+
+        assertEquals(ErrorCode.RECORD_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void getMedicalRecord_Success_WhenUserIsPatient() {
+        User user1 = new User();
+        user1.setEmail("patient@gmail.com");
+        User user2 = new User();
+        user2.setEmail("doctor@gmail.com");
+
+        Patient patient = new Patient();
+        patient.setUser(user1);
+
+        Doctor doctor = new Doctor();
+        doctor.setUser(user2);
+
+        Appointment appointment = new Appointment();
+        appointment.setPatient(patient);
+        appointment.setDoctor(doctor);
+
+        MedicalRecord medicalRecord = new MedicalRecord();
+        medicalRecord.setAppointment(appointment);
+
+        MedicalRecord record = new MedicalRecord();
+        record.setAppointment(appointment);
+
+        MedicalRecordResponse  expectedResponse = new MedicalRecordResponse();
+        when(medicalRecordRepository.findByAppointmentId(any())).thenReturn(Optional.of(record));
+        when(medicalRecordMapper.toMedicalRecordResponse(any())).thenReturn(expectedResponse);
+
+        try (var mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUserEmail).thenReturn(patient.getUser().getEmail());
+
+            var result = medicalRecordServiceImpl.getMedicalRecordByAppointmentId(appointmentId);
+
+            assertNotNull(result);
+            assertEquals(expectedResponse, result);
+        }
+    }
 }
