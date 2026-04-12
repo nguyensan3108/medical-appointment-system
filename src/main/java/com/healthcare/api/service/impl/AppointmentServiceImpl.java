@@ -11,10 +11,8 @@ import com.healthcare.api.repository.PatientRepository;
 import com.healthcare.api.repository.ScheduleRepository;
 import com.healthcare.api.repository.UserRepository;
 import com.healthcare.api.service.AppointmentService;
-
 import com.healthcare.api.utils.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +73,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new AppException(ErrorCode.UNAUTHORIZED_ACTION);
         }
 
-        if(appointment.getStatus() == AppointmentStatus.CANCELLED || appointment.getStatus() == AppointmentStatus.CANCELLED) {
+        if(appointment.getStatus() == AppointmentStatus.COMPLETED || appointment.getStatus() == AppointmentStatus.CANCELLED) {
             throw new AppException(ErrorCode.INVALID_STATUS);
         }
 
