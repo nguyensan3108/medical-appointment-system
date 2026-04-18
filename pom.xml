@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.healthcare</groupId>
-    <artifactId>smart-healthcare-backend</artifactId>
+    <artifactId>medical-appointment-system</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>smart-healthcare-backend</name>
-    <description>smart-healthcare-backend</description>
+    <name>medical-appointment-system</name>
+    <description>Medical Appointment System</description>
     <url/>
     <licenses>
         <license/>
