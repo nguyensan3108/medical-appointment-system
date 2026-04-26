@@ -15,6 +15,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
     List<Schedule> findByDoctorIdAndAvailableFromBetween(UUID doctorId, LocalDateTime startTime, LocalDateTime endTime);
 
     Page<Schedule> findByDoctorIdAndAvailableFromBetween(UUID doctorId, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable );
-
-    boolean existsByDoctorIdAndAvailableFrom(UUID doctorId, LocalDateTime from);
 }

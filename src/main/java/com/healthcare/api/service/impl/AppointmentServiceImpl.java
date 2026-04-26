@@ -2,20 +2,22 @@ package com.healthcare.api.service.impl;
 
 import com.healthcare.api.dto.request.AppointmentCreationRequest;
 import com.healthcare.api.dto.response.AppointmentResponse;
+import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.entity.*;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
 import com.healthcare.api.mapper.AppointmentMapper;
-import com.healthcare.api.repository.AppointmentRepository;
-import com.healthcare.api.repository.PatientRepository;
-import com.healthcare.api.repository.ScheduleRepository;
-import com.healthcare.api.repository.UserRepository;
+import com.healthcare.api.repository.*;
 import com.healthcare.api.service.AppointmentService;
 import com.healthcare.api.utils.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final ScheduleRepository scheduleRepository;
+    private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final AppointmentMapper appointmentMapper;
@@ -83,5 +86,37 @@ public class AppointmentServiceImpl implements AppointmentService {
         Schedule schedule = appointment.getSchedule();
         schedule.setAvailable(true);
         scheduleRepository.save(schedule);
+    }
+
+    @Override
+    public PageResponse<AppointmentResponse> getMyAppointments(int page, int size) {
+        String email = SecurityUtils.getCurrentUserEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Appointment> appointmentPage;
+
+        if(user.getRole().getName().toUpperCase().contains("DOCTOR")) {
+            Doctor doctor = doctorRepository.findByUserId(user.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            appointmentPage = appointmentRepository.findByDoctorId(doctor.getId(), pageable);
+        } else {
+            Patient patient = patientRepository.findByUserId(user.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            appointmentPage = appointmentRepository.findByPatientId(patient.getId(), pageable);
+        }
+
+        List<AppointmentResponse> responses = appointmentPage.getContent().stream()
+                .map(appointmentMapper::toAppointmentResponse)
+                .toList();
+
+        return PageResponse.<AppointmentResponse>builder()
+                .currentPage(page)
+                .pageSize(appointmentPage.getSize())
+                .totalPages(appointmentPage.getTotalPages())
+                .totalElements(appointmentPage.getTotalElements())
+                .data(responses)
+                .build();
     }
 }
