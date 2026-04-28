@@ -14,7 +14,6 @@ import org.mapstruct.Mappings;
 public interface MedicalRecordMapper {
     @Mapping(target = "id",  ignore = true)
     @Mapping(target = "appointment",  ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "prescriptions",   ignore = true)
     MedicalRecord toMedicalRecord(MedicalRecordCreationRequest request);
 

@@ -1,7 +1,9 @@
 CREATE TABLE roles
 (
     id   SERIAL PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL
+    name VARCHAR(50) UNIQUE NOT NULL,
+    created_at timestamp DEFAULT current_timestamp,
+    updated_at timestamp DEFAULT current_timestamp
 );
 
 INSERT INTO roles (name)
@@ -93,7 +95,8 @@ Create table medical_records (
     diagnosis text not null,
     treatment_plan text,
     notes text,
-    created_at timestamp without time zone,
+    created_at timestamp default current_timestamp,
+    updated_at timestamp default current_timestamp,
     constraint fk_medical_record_appointment foreign key (appointment_id) references appointments(id)
 );
 
@@ -104,5 +107,7 @@ create table prescriptions (
     dosage varchar(255) not null,
     duration varchar(255),
     instructions text,
+    created_at timestamp default current_timestamp,
+    updated_at timestamp default current_timestamp,
     constraint fr_prescription_medical_record foreign key (medical_record_id) references medical_records(id)
 );
