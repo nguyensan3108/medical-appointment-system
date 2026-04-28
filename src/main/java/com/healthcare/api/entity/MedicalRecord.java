@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MedicalRecord {
+public class MedicalRecord extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -35,16 +35,8 @@ public class MedicalRecord {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
     @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Prescription> prescriptions;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     @Override
     public boolean equals(Object o){
