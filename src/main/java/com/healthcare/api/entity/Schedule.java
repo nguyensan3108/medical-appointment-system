@@ -3,6 +3,8 @@ package com.healthcare.api.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,6 +13,8 @@ import java.util.UUID;
 @Table(name = "schedules")
 @Getter
 @Setter
+@SQLRestriction("deleted = false")
+@SQLDelete(sql = "UPDATE schedules SET deleted = true WHERE id=?")
 public class Schedule extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

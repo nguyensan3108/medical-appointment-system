@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -16,6 +18,8 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SQLRestriction("deleted = false")
+@SQLDelete(sql = "UPDATE patients SET deleted = true WHERE id=?")
 public class Patient extends  BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

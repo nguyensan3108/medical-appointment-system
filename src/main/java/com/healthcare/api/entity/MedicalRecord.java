@@ -2,6 +2,8 @@ package com.healthcare.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("deleted = false")
+@SQLDelete(sql = "UPDATE medical_records SET deleted = true WHERE id=?")
 public class MedicalRecord extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
