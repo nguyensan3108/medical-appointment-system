@@ -3,7 +3,8 @@ CREATE TABLE roles
     id   SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
     created_at timestamp DEFAULT current_timestamp,
-    updated_at timestamp DEFAULT current_timestamp
+    updated_at timestamp DEFAULT current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 INSERT INTO roles (name)
@@ -23,6 +24,7 @@ CREATE TABLE users
 
     created_at timestamp        DEFAULT current_timestamp,
     updated_at timestamp        DEFAULT current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
 
     CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES roles (id)
 );
@@ -37,6 +39,7 @@ CREATE TABLE doctors
 
     created_at       timestamp        default current_timestamp,
     updated_at       timestamp        default current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
 
     CONSTRAINT fk_doctor_user FOREIGN KEY (user_id) REFERENCES users (id) On DELETE CASCADE
 );
@@ -52,6 +55,7 @@ CREATE TABLE patients
 
     created_at      timestamp        default current_timestamp,
     updated_at      timestamp        default current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
 
     CONSTRAINT fk_patient_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
@@ -64,6 +68,7 @@ CREATE TABLE schedules (
     is_available BOOLEAN DEFAULT True,
     created_at timestamp DEFAULT current_timestamp,
     updated_at timestamp default current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
 
     CONSTRAINT fk_schedule_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
 );
@@ -80,6 +85,7 @@ Create table appointments (
 
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
 
     constraint fk_appointment_patient foreign key (patient_id) references patients(id),
     constraint fk_appointment_doctor foreign key (doctor_id) references doctors(id),
@@ -97,6 +103,7 @@ Create table medical_records (
     notes text,
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
     constraint fk_medical_record_appointment foreign key (appointment_id) references appointments(id)
 );
 
@@ -109,5 +116,6 @@ create table prescriptions (
     instructions text,
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp,
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
     constraint fr_prescription_medical_record foreign key (medical_record_id) references medical_records(id)
 );
