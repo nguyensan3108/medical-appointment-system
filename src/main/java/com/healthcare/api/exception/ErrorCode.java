@@ -21,6 +21,7 @@ public enum ErrorCode {
     RECORD_ALREADY_EXISTS(1012, "Medical record already exists for this appointment", HttpStatus.BAD_REQUEST),
     RECORD_NOT_FOUND(1013, "Medical record not found for this appointment", HttpStatus.NOT_FOUND),
     VALIDATION_ERROR(1014, "Invalid input data", HttpStatus.BAD_REQUEST),
+    OPTIMISTIC_LOCK_EXCEPTION(1015, "The data has been updated by someone else", HttpStatus.CONFLICT),
     ;
 
     private final int code;

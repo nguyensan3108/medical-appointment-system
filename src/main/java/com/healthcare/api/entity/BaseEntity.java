@@ -3,6 +3,7 @@ package com.healthcare.api.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -26,4 +27,8 @@ public abstract class BaseEntity {
 
     @Column(nullable = false)
     boolean deleted = false;
+
+    @Version
+    @Column(nullable = false)
+    Long version = 0L;
 }
