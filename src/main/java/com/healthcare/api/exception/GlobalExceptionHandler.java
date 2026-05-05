@@ -72,4 +72,16 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(apiResponse);
     }
+
+    @ExceptionHandler(value = org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handlingObjectOptimisticLockException(org.springframework.orm.ObjectOptimisticLockingFailureException exception) {
+        log.warn("Optimistic locking failure: {}", exception.getMessage());
+        ErrorCode errorCode = ErrorCode.OPTIMISTIC_LOCK_EXCEPTION;
+
+        ApiResponse<Void> apiResponse = new ApiResponse<>();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
 }
