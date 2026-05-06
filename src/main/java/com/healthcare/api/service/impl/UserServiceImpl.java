@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
         Page<User> userPage = userRepository.findAll(pageable);
 
         List<UserResponse> userResponses = userPage.getContent().stream()
-                .map(this::mapToUserResponse)
+                .map(userMapper::toUserResponse)
                 .toList();
 
         return PageResponse.<UserResponse>builder()
