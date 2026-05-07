@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,5 +90,16 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage(errorCode.getMessage());
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
+
+    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handlingHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        log.warn("Malformed JSON request: {}", exception.getMessage());
+        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
+                .code(ErrorCode.VALIDATION_ERROR.getCode())
+                .message("Invalid JSON formatting")
+                .build();
+
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 }
