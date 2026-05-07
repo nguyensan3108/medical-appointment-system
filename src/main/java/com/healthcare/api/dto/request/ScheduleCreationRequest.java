@@ -1,6 +1,7 @@
 package com.healthcare.api.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.healthcare.api.validator.ValidTimeRange;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
+@ValidTimeRange
 public class ScheduleCreationRequest {
     @NotNull(message = "Start time cannot be null")
     @Future(message = "Start time must be in the future")
