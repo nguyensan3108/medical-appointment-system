@@ -4,6 +4,7 @@ import com.healthcare.api.dto.request.AppointmentCreationRequest;
 import com.healthcare.api.dto.response.AppointmentResponse;
 import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.entity.*;
+import com.healthcare.api.event.AppointmentBookedEvent;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
 import com.healthcare.api.mapper.AppointmentMapper;
@@ -11,6 +12,7 @@ import com.healthcare.api.repository.*;
 import com.healthcare.api.service.AppointmentService;
 import com.healthcare.api.utils.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final AppointmentMapper appointmentMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -57,6 +60,16 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setReason(request.getReason());
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        String date = savedAppointment.getSchedule().getAvailableFrom().toLocalDate().toString();
+        String time = savedAppointment.getSchedule().getAvailableFrom().toLocalTime().toString();
+
+        eventPublisher.publishEvent(new AppointmentBookedEvent(
+                user.getEmail(),
+                user.getFullName(),
+                date,
+                time
+        ));
 
         return appointmentMapper.toAppointmentResponse(savedAppointment);
     }
