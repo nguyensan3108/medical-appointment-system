@@ -3,6 +3,7 @@ package com.healthcare.api.service.impl;
 import com.healthcare.api.dto.request.AppointmentCreationRequest;
 import com.healthcare.api.dto.response.AppointmentResponse;
 import com.healthcare.api.entity.*;
+import com.healthcare.api.event.AppointmentBookedEvent;
 import com.healthcare.api.exception.AppException;
 import com.healthcare.api.exception.ErrorCode;
 import com.healthcare.api.mapper.AppointmentMapper;
@@ -17,7 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +41,8 @@ class AppointmentServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private AppointmentMapper appointmentMapper;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private AppointmentServiceImpl appointmentService;
@@ -71,8 +76,10 @@ class AppointmentServiceImplTest {
         schedule.setId(UUID.fromString(appointmentId));
         schedule.setDoctor(doctor);
         schedule.setAvailable(true);
+        schedule.setAvailableFrom(LocalDateTime.now());
 
         Appointment savedAppointment = new Appointment();
+        savedAppointment.setSchedule(schedule);
         AppointmentResponse expectedResponse = new AppointmentResponse();
         request.setScheduleId(schedule.getId());
 
@@ -91,6 +98,7 @@ class AppointmentServiceImplTest {
 
             verify(scheduleRepository, times(1)).save(schedule);
             verify(appointmentRepository, times(1)).save(any(Appointment.class));
+            verify(eventPublisher, times(1)).publishEvent(any(AppointmentBookedEvent.class));
         }
     }
 
