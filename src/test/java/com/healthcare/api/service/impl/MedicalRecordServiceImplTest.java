@@ -1,6 +1,7 @@
 package com.healthcare.api.service.impl;
 
 import com.healthcare.api.dto.request.MedicalRecordCreationRequest;
+import com.healthcare.api.dto.request.PrescriptionRequest;
 import com.healthcare.api.dto.response.MedicalRecordResponse;
 import com.healthcare.api.entity.*;
 import com.healthcare.api.exception.AppException;
@@ -16,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,7 +50,7 @@ class MedicalRecordServiceImplTest {
 
 
     @Test
-    void createAppointmentSuccess_ReturnMedicalRecordResponse() {
+    void createMedicalRecord_Success_ReturnMedicalRecordResponse() {
         Appointment appointment = new Appointment();
 
         MedicalRecordResponse expectedResponse = new MedicalRecordResponse();
@@ -108,7 +111,7 @@ class MedicalRecordServiceImplTest {
         AppException exception = assertThrows(AppException.class, () ->
                 medicalRecordServiceImpl.createMedicalRecord((request)));
 
-        assertEquals(ErrorCode.UNAUTHORIZED_ACTION, exception.getErrorCode());
+        assertEquals(ErrorCode.APPOINTMENT_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -168,5 +171,49 @@ class MedicalRecordServiceImplTest {
             assertNotNull(result);
             assertEquals(expectedResponse, result);
         }
+    }
+
+    @Test
+    void createMedicalRecord_InvalidStatus() {
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+
+        when(appointmentRepository.findById(any())).thenReturn(Optional.of(appointment));
+
+        AppException exception = assertThrows(AppException.class, () ->
+                medicalRecordServiceImpl.createMedicalRecord((request))
+        );
+
+        assertEquals(ErrorCode.INVALID_STATUS, exception.getErrorCode());
+        verify(medicalRecordRepository, never()).save(any());
+    }
+
+    @Test
+    void createMedicalRecord_Success_WithPrescriptions() {
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+
+        MedicalRecordResponse expectedResponse = new MedicalRecordResponse();
+        expectedResponse.setAppointmentId(appointmentId);
+
+        List<PrescriptionRequest> listPrescriptions = new ArrayList<>();
+        listPrescriptions.add(new PrescriptionRequest());
+        request.setPrescriptions(listPrescriptions);
+
+        MedicalRecord medicalRecord = new MedicalRecord();
+        medicalRecord.setAppointment(appointment);
+        MedicalRecord savedRecord = new MedicalRecord();
+
+        when(appointmentRepository.findById(any())).thenReturn(Optional.of(appointment));
+        when(medicalRecordRepository.findByAppointmentId(any())).thenReturn(Optional.empty());
+        when(medicalRecordMapper.toMedicalRecord(any())).thenReturn(medicalRecord);
+        when(medicalRecordRepository.save(any())).thenReturn(savedRecord);
+        when(medicalRecordMapper.toMedicalRecordResponse(any())).thenReturn(expectedResponse);
+        when(medicalRecordMapper.toPrescription(any())).thenReturn(new Prescription());
+
+        var result = medicalRecordServiceImpl.createMedicalRecord(request);
+
+        assertNotNull(result);
+        verify(medicalRecordRepository, times(1)).save(any());
     }
 }

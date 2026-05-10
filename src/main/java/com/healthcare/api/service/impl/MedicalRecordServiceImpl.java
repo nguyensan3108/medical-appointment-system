@@ -32,10 +32,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Transactional
     public MedicalRecordResponse createMedicalRecord(MedicalRecordCreationRequest request){
         Appointment appointment = appointmentRepository.findById(UUID.fromString(request.getAppointmentId()))
-                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED_ACTION));
+                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
         if(medicalRecordRepository.findByAppointmentId(appointment.getId()).isPresent()){
             throw new AppException(ErrorCode.RECORD_ALREADY_EXISTS);
+        }
+
+        if(appointment.getStatus().equals(AppointmentStatus.CANCELLED)){
+            throw new AppException(ErrorCode.INVALID_STATUS);
         }
 
         MedicalRecord medicalRecord = medicalRecordMapper.toMedicalRecord(request);
