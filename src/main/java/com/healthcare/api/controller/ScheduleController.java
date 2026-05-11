@@ -9,6 +9,7 @@ import com.healthcare.api.entity.Schedule;
 import com.healthcare.api.service.ScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('DOCTOR')")
     public ApiResponse<String> createSchedule(@RequestBody @Valid ScheduleCreationRequest request) {
         scheduleService.createSchedule(request);
