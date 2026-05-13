@@ -5,15 +5,12 @@ import com.healthcare.api.dto.request.ScheduleCreationRequest;
 import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.dto.response.ScheduleResponse;
-import com.healthcare.api.entity.Schedule;
 import com.healthcare.api.service.ScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/schedules")
