@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserUpdateRequest {
+    @NotBlank
     private String password;
     @NotBlank
     private String fullName;
