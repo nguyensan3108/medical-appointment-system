@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
-
 class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -98,6 +99,7 @@ class UserControllerTest {
     void updateUser_ValidationFail_Returns400BadRequest() throws Exception {
         UserUpdateRequest updateRequest = new UserUpdateRequest();
         updateRequest.setFullName("");
+        updateRequest.setPassword("");
 
         mockMvc.perform(put("/api/v1/users/{userId}", userId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -112,11 +114,12 @@ class UserControllerTest {
                 .data(List.of(userResponse))
                 .build();
 
-        when(userService.getUsers(any(Integer.class), any(Integer.class))).thenReturn(pageResponse);
+        when(userService.getUsers(anyInt(), anyInt())).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/v1/users")
                 .param("page", "1")
                 .param("size", "10"))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(SuccessCode.DATA_FETCHED.getCode()))
                 .andExpect(jsonPath("$.result.totalElements").value(1));
     }
@@ -125,6 +128,7 @@ class UserControllerTest {
     void updateUser_Success_Returns200Ok() throws Exception {
         UserUpdateRequest updateRequest = new UserUpdateRequest();
         updateRequest.setFullName("Nguyen Doctor");
+        updateRequest.setPassword("Password123@");
 
         when(userService.updateUser(any(), any())).thenReturn(userResponse);
 
@@ -138,9 +142,12 @@ class UserControllerTest {
 
     @Test
     void deleteUser_Success_Returns200Ok() throws Exception {
+        doNothing().when(userService).deleteUser(any());
+
         mockMvc.perform(delete("/api/v1/users/{userId}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(SuccessCode.SUCCESS.getCode()))
-                .andExpect(jsonPath("$.message").value("Delete user information by id"));
+                .andExpect(jsonPath("$.message").value("Delete user information by id"))
+                .andExpect(jsonPath("$.result").value("User Id deleted: " + userId));
     }
 }
