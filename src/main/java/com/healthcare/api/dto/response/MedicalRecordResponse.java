@@ -1,6 +1,5 @@
 package com.healthcare.api.dto.response;
 
-import com.healthcare.api.dto.request.PrescriptionRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

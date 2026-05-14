@@ -37,7 +37,7 @@ class AuthenticationControllerTest {
     private AuthenticationResponse authResponse;
 
     @BeforeEach
-    void Setup() {
+    void setUp() {
         authRequest = AuthenticationRequest.builder()
                 .email("admin@gmail.com")
                 .password("Password123")
