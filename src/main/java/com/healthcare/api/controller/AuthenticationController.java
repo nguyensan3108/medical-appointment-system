@@ -6,7 +6,6 @@ import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.AuthenticationResponse;
 import com.healthcare.api.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
