@@ -8,16 +8,18 @@ import com.healthcare.api.dto.response.PageResponse;
 import com.healthcare.api.service.AppointmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/appointments")
+@RequestMapping("/api/v1/appointments")
 @RequiredArgsConstructor
 public class AppointmentController {
     private final AppointmentService appointmentService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('PATIENT')")
     public ApiResponse<AppointmentResponse> bookAppointment(@RequestBody @Valid AppointmentCreationRequest request){
         return ApiResponse.<AppointmentResponse>builder()

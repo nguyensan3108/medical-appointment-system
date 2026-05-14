@@ -1,6 +1,5 @@
 package com.healthcare.api.dto.request;
 
-import com.healthcare.api.entity.Prescription;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

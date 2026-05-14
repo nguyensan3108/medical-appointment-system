@@ -59,8 +59,8 @@ class ScheduleServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        startTime = LocalDateTime.of(2026, 5, 1, 8, 0);
-        endTime = LocalDateTime.of(2026, 5, 1, 9, 0);
+        startTime = LocalDateTime.of(2030, 5, 1, 8, 0);
+        endTime = LocalDateTime.of(2030, 5, 1, 9, 0);
 
         request = new ScheduleCreationRequest();
         request.setAvailableFrom(startTime);
@@ -204,6 +204,89 @@ class ScheduleServiceImplTest {
             assertEquals(1, result.getTotalElements());
             assertEquals(1, result.getData().size());
             assertEquals(scheduleResponse, result.getData().get(0));
+        }
+    }
+
+    @Test
+    void createSchedule_UserNotFound() {
+        String email = "uknown@gmail.com";
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        try (var mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUserEmail).thenReturn(email);
+
+            AppException exception = assertThrows(AppException.class, () ->
+                    scheduleServiceImpl.createSchedule(request));
+
+            assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+
+            verify(doctorRepository, never()).findByUserId(any());
+            verify(scheduleRepository, never()).findByDoctorIdAndAvailableFromBetween(any(), any(), any());
+            verify(scheduleRepository, never()).saveAll(any());
+        }
+    }
+
+    @Test
+    void createSchedule_PartialSuccess() {
+        User doctorUser  = new User();
+        doctorUser.setId(UUID.randomUUID());
+        doctorUser.setEmail("doctor@gmail.com");
+
+        Doctor doctor = new Doctor();
+        doctor.setId(UUID.randomUUID());
+        doctor.setUser(doctorUser);
+
+        Schedule existingSlot = new Schedule();
+        existingSlot.setAvailableFrom(startTime);
+
+        List<Schedule> existingSchedules = new ArrayList<>();
+        existingSchedules.add(existingSlot);
+
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(doctorUser));
+        when(doctorRepository.findByUserId(any())).thenReturn(Optional.of(doctor));
+        when(scheduleRepository.findByDoctorIdAndAvailableFromBetween(any(), any(), any()))
+                .thenReturn(existingSchedules);
+
+        try(var mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUserEmail).thenReturn(doctorUser.getEmail());
+            scheduleServiceImpl.createSchedule(request);
+
+            verify(scheduleRepository, times(1)).saveAll(scheduleListCaptor.capture());
+            List<Schedule> capturedSchedules = scheduleListCaptor.getValue();
+
+            assertEquals(1, capturedSchedules.size());
+
+            Schedule savedSlot = capturedSchedules.get(0);
+            assertEquals(startTime.plusMinutes(30), savedSlot.getAvailableFrom());
+            assertEquals(endTime, savedSlot.getAvailableTo());
+            assertTrue(savedSlot.isAvailable());
+        }
+    }
+
+    @Test
+    void getMySchedules_EmptyList() {
+        User doctorUser  = new User();
+        doctorUser.setId(UUID.randomUUID());
+        doctorUser.setEmail("doctor@gmail.com");
+
+        Doctor doctor = new Doctor();
+        doctor.setId(UUID.randomUUID());
+        doctor.setUser(doctorUser);
+
+        int page = 1;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page - 1, size);
+        PageImpl<Schedule> emptyList = new PageImpl(new ArrayList<>(), pageable, 0);
+
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(doctorUser));
+        when(doctorRepository.findByUserId(any())).thenReturn(Optional.of(doctor));
+        when(scheduleRepository.findByDoctorIdAndAvailableFromBetween(any(), any(), any(), any())).thenReturn(emptyList);
+
+        try(var mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUserEmail).thenReturn(doctorUser.getEmail());
+            PageResponse<ScheduleResponse> result = scheduleServiceImpl.getMySchedules(page, size);
+            assertNotNull(result);
+            assertEquals(0, result.getTotalElements());
+            assertTrue(result.getData().isEmpty());
         }
     }
 }

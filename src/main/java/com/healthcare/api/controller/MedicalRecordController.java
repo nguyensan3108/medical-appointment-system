@@ -4,10 +4,10 @@ import com.healthcare.api.constant.SuccessCode;
 import com.healthcare.api.dto.request.MedicalRecordCreationRequest;
 import com.healthcare.api.dto.response.ApiResponse;
 import com.healthcare.api.dto.response.MedicalRecordResponse;
-import com.healthcare.api.entity.MedicalRecord;
 import com.healthcare.api.service.MedicalRecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +18,7 @@ public class MedicalRecordController {
     private final MedicalRecordService medicalRecordService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('DOCTOR')")
     public ApiResponse<MedicalRecordResponse> createMedicalRecord(@RequestBody @Valid MedicalRecordCreationRequest request) {
         return ApiResponse.<MedicalRecordResponse>builder()

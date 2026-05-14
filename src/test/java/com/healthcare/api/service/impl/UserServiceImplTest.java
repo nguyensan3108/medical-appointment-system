@@ -23,14 +23,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Optional.empty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
@@ -260,5 +262,35 @@ class UserServiceImplTest {
         userService.deleteUser(stringId);
 
         verify(userRepository, times(1)).deleteById(any(UUID.class));
+    }
+
+    @Test
+    void getUsers_Success_ReturnPageResponse() {
+        int page = 1;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        Role role = new Role();
+        role.setName("PATIENT");
+        user.setRole(role);
+
+        List<User> userList = Collections.singletonList(user);
+        Page<User> userPage = new PageImpl<>(userList, pageable, 1);
+
+        UserResponse userResponse = new UserResponse();
+        userResponse.setEmail("test@gmail.com");
+
+        when(userRepository.findAll(pageable)).thenReturn(userPage);
+        when(userMapper.toUserResponse(any(User.class))).thenReturn(userResponse);
+
+        var result = userService.getUsers(page, size);
+
+        assertNotNull(result);
+        assertEquals(1,result.getCurrentPage());
+        assertEquals(1,result.getTotalElements());
+        assertEquals(1,result.getData().size());
+        assertEquals("test@gmail.com", result.getData().get(0).getEmail());
     }
 }
