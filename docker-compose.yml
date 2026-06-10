@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: medical-postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=healthcare_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - medical-network
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medical-spring-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/healthcare_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - JWT_SIGNER_KEY=1234123412341234123412341234123412341234123412341234
+      - MAIL_USERNAME=my_email@gmail.com
+      - MAIL_PASSWORD=my_password
+    networks:
+      - medical-network
+volumes:
+  postgres_data:
+networks:
+  medical-network:
+    driver: bridge
