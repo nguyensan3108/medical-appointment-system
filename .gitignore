@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local Enviroment & Secrets ###
+.env
+.env.local
+docker-compose.override.yml

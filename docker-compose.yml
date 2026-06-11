@@ -26,9 +26,9 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/healthcare_db
       - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
-      - JWT_SIGNER_KEY=1234123412341234123412341234123412341234123412341234
-      - MAIL_USERNAME=my_email@gmail.com
-      - MAIL_PASSWORD=my_password
+      - JWT_SIGNER_KEY={JWT_SIGNER_KEY}
+      - MAIL_USERNAME={MAIL_USERNAME}
+      - MAIL_PASSWORD={MAIL_PASSWORD}
     networks:
       - medical-network
 volumes:

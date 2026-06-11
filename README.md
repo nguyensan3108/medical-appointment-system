@@ -1,52 +1,72 @@
 # Medical Appointment System - Backend API
 
-A backend API for a Medical Appointment Management System built with Java and Spring Boot. This project implements core features for appointment booking, medical record management, and role-based access control.
+This repository contains the backend core logic for a Medical Appointment Management System built on the Spring Boot framework. The application handles core functionalities including role-based access control, appointment scheduling, and automated email notifications, operating on a containerized infrastructure.
 
-## Key Features
+## Project Architecture & Tech Stack
 
-* **Architecture:** Strictly follows the Controller-Service-Repository pattern.
-* **Database Design:**
-    * **Soft Deletes:** Implemented via `@SQLDelete` and `@SQLRestriction` to retain historical data.
-    * **Optimistic Locking:** Utilizes `@Version` in `BaseEntity` to handle concurrent booking requests and prevent data overwrites.
-    * **Auditing:** Integrated JPA Auditing to automatically track record creation and modification times.
-* **Event-Driven Processing:** Uses Spring's `ApplicationEventPublisher` and `TransactionalEventListener` to decouple asynchronous email notifications from the main booking transaction.
-* **Testing:** Achieved 100% Line and Branch Coverage for the controller layer using `MockMvc` and `Mockito`.
+The system strictly adheres to the standard Controller-Service-Repository pattern to ensure separation of concerns.
 
-## Tech Stack
+* **Core Framework:** Java 21, Spring Boot 4.0.3
+* **Database & Persistence:** PostgreSQL 16, Spring Data JPA, Hibernate
+* **Security:** Spring Security, JSON Web Token (JWT)
+* **Infrastructure:** Docker, Docker Compose (Multi-stage build)
 
-* **Framework:** Java 21, Spring Boot 4.0.x (Spring 7)
-* **Database:** PostgreSQL
-* **Security:** Spring Security, JWT (JSON Web Tokens), RBAC
-* **Testing:** JUnit, Mockito, AssertJ
-* **API Documentation:** Springdoc OpenAPI (Swagger UI)
+### Key Implementation Details
 
-## Local Setup
+* **Database Reliability:** Implemented Soft Deletes via Hibernate `@SQLDelete` and Optimistic Locking with `@Version` to handle concurrent data modifications safely.
+* **Global Exception Handling:** Centralized error handling using Spring's `@ControllerAdvice` to ensure unified, predictable, and clean standard API responses (`ApiResponse`) across all endpoints.
+* **Advanced Data Validation:** Beyond standard Jakarta validations, implemented custom constraint annotations (e.g., `@NotPastDate`, `@ValidTimeRange`) to strictly enforce business rules at the controller layer.
+* **High-Performance Object Mapping:** Utilized `MapStruct` for compile-time, type-safe mapping between Entities and DTOs, significantly reducing boilerplate code and improving execution speed.
+* **Event-Driven Processing:** Utilizes Spring's `ApplicationEventPublisher` to decouple the main appointment booking transaction from the asynchronous email dispatch logic.
+* **Schema Validation:** Configured with `ddl-auto=validate` to enforce production-grade schema integrity, relying on pre-defined SQL scripts (`init.sql`) rather than automated Hibernate schema generation.
+* **Test-Driven Approach:** Ensured application reliability by writing extensive Unit Tests for both Controller and Service layers using `JUnit 5`, `Mockito`, and `MockMvc`.
 
-### 1. Database Configuration
-Create a PostgreSQL database named `healthcare_db`. Update the `src/main/resources/application.properties` file with your local database credentials and JWT secret:
+---
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/healthcare_db
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+## Installation & Deployment Guide
 
-jwt.signerKey=your_jwt_secret_key_must_be_long_enough
+The entire development environment is containerized using Docker Compose. There is no requirement to install Java, Maven, or PostgreSQL directly on the host operating system.
 
-spring.mail.username=your_email@gmail.com
-spring.mail.password=your_app_password
-```
+### Prerequisites
+* Git
+* Docker Desktop (Windows/macOS) or Docker Engine with Docker Compose CLI (Linux)
 
-### 2. Build the project
-Open a terminal in the project root directory and execute:
-```
-# Build the project
-./mvnw clean package
+### Execution Steps
 
-# Run the application
-./mvnw spring-boot:run
-```
-The server will start by default at `http://localhost:8080.`
+1. **Clone the Repository**
+```bash
+   git clone [https://github.com/nguyensan3108/medical-appointment-system.git](https://github.com/nguyensan3108/medical-appointment-system.git)
+   cd medical-appointment-system
+   ```
 
-## API Documentation
-Once the application is running, the interactive Swagger UI documentation can be accessed at:
-`http://localhost:8080/swagger-ui/index.html`
+2. **Configure Environment Variables**
+  * The application relies on system environment variables to isolate sensitive credentials from the codebase.
+
+  * Copy the template configuration file:
+```bash
+    cp .env.example .env
+   ```
+   * Open the newly created `.env` file and replace the placeholders with your actual values (such as your Google App Password for SMTP mail service and a secure encryption key for JWT).
+
+3. **Launch the Containers**
+  * Execute the deployment command from the root directory containing the `docker-compose.yml` file:
+```bash
+   docker compose up --build -d
+   ```
+
+4. **Verify Application Logs**
+  * To monitor the boot sequence and ensure the database connection pool initiates successfully, stream the container logs:
+```bash
+  docker compose logs -f app
+  ```
+  * The application is ready when the log confirms the embedded Tomcat server has started on port 8080.
+
+5. **Access API Documentation**
+  * Once the application is running, the interactive OpenAPI/Swagger documentation can be accessed locally at:
+   ```http://localhost:8080/swagger-ui/index.html```
+
+6. **Shutdown Command**
+  * To stop all running services and dismantle the virtual network without destroying persistent database volumes, run:
+```bash
+   docker compose down
+   ```
